@@ -1,24 +1,16 @@
 package juegocartas;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Random;
+import java.util.*;
 import javax.swing.JPanel;
 
 public class Jugador {
 
     private int TOTAL_CARTAS = 10;
-    private int MARGEN_SUPERIOR = 10;
-    private int MARGEN_IZQUIERDA = 10;
-    private int DISTANCIA = 50;
+    private int DISTANCIA = 40;
+    private int MARGEN = 5;
 
     private Carta[] cartas = new Carta[TOTAL_CARTAS];
-    private Random r;
-
-    public Jugador() {
-        r = new Random();
-    }
+    private Random r = new Random();
 
     public void repartir() {
         for (int i = 0; i < TOTAL_CARTAS; i++) {
@@ -28,138 +20,105 @@ public class Jugador {
 
     public void mostrar(JPanel pnl) {
         pnl.removeAll();
-        //for (int i = 0; i < cartas.length; i++) {
-
-        int x = MARGEN_IZQUIERDA;
-        for (Carta c : cartas) {
-            //cartas[i].mostrar(pnl, 10, 5);
-            c.mostrar(pnl, x, MARGEN_SUPERIOR);
-            x += DISTANCIA;
+        for (int i = 0; i < cartas.length; i++) {
+            cartas[i].mostrar(pnl, MARGEN + TOTAL_CARTAS * DISTANCIA - i * DISTANCIA, MARGEN);
         }
         pnl.repaint();
     }
 
     public String getGrupos() {
-        String mensaje = "No se encontraron grupos";
-        if (cartas[0] != null) {
+        String mensaje = "No hay grupos";
+        int[] contadores = new int[NombreCarta.values().length];
 
-            int[] contadores = new int[NombreCarta.values().length];
+        for (int i = 0; i < cartas.length; i++) {
+            contadores[cartas[i].getNombre().ordinal()]++;
+        }
+        
 
-            for (Carta c : cartas) {
-                contadores[c.ObtenerNombre().ordinal()]++;
+        int totalGrupos = 0;
+        for (int i = 0; i < contadores.length; i++) {
+            if (contadores[i] >= 2) {
+                totalGrupos++;
             }
-
-            int totalGrupos = 0;
+        }
+        if (totalGrupos > 0) {
+            mensaje = "Los grupos encontrados fueron:\n";
             for (int i = 0; i < contadores.length; i++) {
-                if (contadores[i] > 1) {
-                    totalGrupos++;
+                if (contadores[i] >= 2) {
+                    mensaje += Grupo.values()[contadores[i]] + " de " + NombreCarta.values()[i] + "\n";
                 }
             }
-
-            if (totalGrupos > 0) {
-                mensaje = "Los grupos encontrador fueron:\n";
-                for (int i = 0; i < contadores.length; i++) {
-                    if (contadores[i] > 1) {
-                        mensaje += Grupo.values()[contadores[i]] + " de " + NombreCarta.values()[i] + "\n";
+        }
+        
+        int totGrupos = 0;
+        for (int i = 0; i < contadores.length; i++) {
+            if (contadores[i] == 1) {
+                totGrupos++;
+            }
+        }
+        if (totGrupos > 0) {
+            mensaje += "\n";
+            mensaje += "Tu puntaje fue: ";
+            int acumulador = 0;
+            for (int i = 0; i < contadores.length; i++) {
+                if (contadores[i] == 1) {
+                    if(NombreCarta.values()[i] == NombreCarta.AS){
+                        acumulador += 10;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.JACK){
+                        acumulador += 10;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.QUEEN){
+                        acumulador += 10;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.KING){
+                        acumulador += 10;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.DOS){
+                        acumulador += 2;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.TRES){
+                        acumulador += 3;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.CUATRO){
+                        acumulador += 4;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.CINCO){
+                        acumulador += 5;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.SEIS){
+                        acumulador += 6;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.SIETE){
+                        acumulador += 7;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.OCHO){
+                        acumulador += 8;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.NUEVE){
+                        acumulador += 9;
+                    }
+                    else if(NombreCarta.values()[i] == NombreCarta.DIEZ){
+                        acumulador += 10;
                     }
                 }
             }
-        } else {
-            mensaje = "No se han repartido cartas";
+            mensaje += acumulador + "\n";
         }
         return mensaje;
     }
-
-    public String getsecuencias() {
-        String msj = "No se encontraron escaleras";
-        if (cartas[0] != null) {
-            int cont[] = new int[cartas.length];
-            for (Carta c : cartas) {
-                cont[c.obtenerPinta().ordinal()]++;
-            }
-
-            List<String> escaleras = new ArrayList<>();
-
-            for (int i = 0; i < cont.length; i++) {
-                if (cont[i] > 0) {
-                    List<Carta> sequence = new ArrayList<>();
-                    for (Carta ct : cartas) {
-                        if (ct.obtenerPinta() == Pinta.values()[i]) {
-                            sequence.add(ct);
-                        }
-                    }
-
-                    sequence.sort(Comparator.comparing(Carta::ObtenerNombre));
-
-                    for (int j = 0; j < sequence.size(); j++) {
-                        for (int groupSize = 3; groupSize <= 10; groupSize++) {
-                            if (j + groupSize - 1 >= sequence.size()) {
-                                break;
-                            }
-                            boolean encontrado = true;
-                            for (int k = 1; k < groupSize; k++) {
-                                if (sequence.get(j).ObtenerNombre().ordinal() + k != sequence.get(j + k).ObtenerNombre().ordinal()) {
-                                    encontrado = false;
-                                    break;
-                                }
-                            }
-                            if (encontrado) {
-                                StringBuilder sb = new StringBuilder();
-                                switch (groupSize) {
-                                    case 3:
-                                        sb.append("Terna de ");
-                                        break;
-                                    case 4:
-                                        sb.append("Cuarta de ");
-                                        break;
-                                    case 5:
-                                        sb.append("Quinta de ");
-                                        break;
-                                    case 6:
-                                        sb.append("Sexta de ");
-                                        break;
-                                    case 7:
-                                        sb.append("Séptima de ");
-                                        break;
-                                    case 8:
-                                        sb.append("Octava de ");
-                                        break;
-                                    case 9:
-                                        sb.append("Novena de ");
-                                        break;
-                                    case 10:
-                                        sb.append("Décima de ");
-                                }
-
-                                sb.append(Pinta.values()[i]);
-                                escaleras.add(sb.toString());
-                            }
-                        }
-                    }
+    
+    public void ordenar(){
+        
+        for(int i = 0; i < cartas.length; i++){
+            for(int j = 0; j < cartas.length; j++){
+                if(cartas[i].getIndice() > cartas[j].getIndice()){
+                    Carta ct = cartas[i];
+                    cartas[i] = cartas[j];
+                    cartas[j] = ct;
                 }
             }
-            if (!escaleras.isEmpty()) {
-                msj = String.join(", ", escaleras);
-            }
         }
-
-        return msj;
-    }
-
-    public String getpuntaje() {
-        String msj = "";
-        int puntaje=0;
         
-        if (cartas[0] != null) {
-            int cont[] = new int[cartas.length];
-            for (Carta c : cartas) {
-            puntaje+=c.ObtenerValor();
-            }
-            
-        } else {
-            msj = "No se han repartido cartas";
-        }
-        return msj;
     }
-
 }

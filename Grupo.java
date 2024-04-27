@@ -1,5 +1,6 @@
 package juegocartas;
 
+
 public enum Grupo {
     VACIO,
     NON,
